@@ -46,6 +46,41 @@ var proxyMult = (function(){
     } 
 })();
 // ---------------------------------
+
+// --------------------缓存代理第二版-----------
+    class ProxyMult {
+        constructor(fn) {
+            this.cache = {}
+            this.fn = fn
+        }
+       async cacheProxy() {
+            // var args = Array.prototype.join.call(arguments, ',') 普通参数
+            var args = JSON.stringify( arguments)
+            if (args in this.cache) {
+                return this.cache[args]
+            } 
+            return this.cache[args] = await this.fn.apply(this, arguments)
+        }
+        getData() {
+            console.log(this.cache);
+        }
+    }
+function apigetjson() {
+    return new Promise((resolve, reject) => {
+        setTimeout(() => {
+            console.log('发起请求', arguments)
+            resolve([1,2,3,4])
+        }, 2000)
+    })
+
+}
+var c = new ProxyMult(apigetjson)
+c.cacheProxy({name: 'zhangsan' }, 666).then(data => {
+    console.log(data);
+})
+
+
+
 // 代理的作用
 // 1. 代理可以缓存真实对象的结果，避免重复计算或读取数据。这对于频繁访问且结果不变的情况特别有用。
 // 控制访问：
